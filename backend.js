@@ -38,23 +38,20 @@
                                 <p style="margin:0 0 5px 0; font-size: 14px;"><span style="font-weight: bold;">No.: </span> ${orderId}</p>
                                 <p style="margin:0 0 5px 0; font-size: 14px;"><span style="font-weight: bold;">Cliente: </span>${response.data.nombre}</p>
                                 <p style="margin:0 0 5px 0; font-size: 14px;"><span style="font-weight: bold;">Tipo de chocolate: </span>${response.data.chocotype}</p>
-                                <p style="margin:0 0 5px 0; font-size: 14px;"><span style="font-weight: bold;">Fecha: </span> ${response.data.fechaEntrega}</p>
-                                <p style="margin:0 0 5px 0; font-size: 14px;"><span style="font-weight: bold;">Telefono: </span> ${response.data.telefono}</p>
-                                <p style="margin:0 0 5px 0; font-size: 14px;"><span style="font-weight: bold;">Direccion: </span> ${response.data.direccion}</p>
                                 ${messageHTML}
                             </div>
                             <table style="border: 1px solid #000; border-collapse: collapse; width: 100%;">
                                 <tr>
-                                    <th style="border: 1px solid #000; text-align: center; padding: 5px;">FRASE O PEDIDO</th>
-                                    <th style="border: 1px solid #000; text-align: center; padding: 5px;">FORMA PAGO</th>
-                                    <th style="border: 1px solid #000; text-align: center; padding: 5px;">TOTAL</th>
+                                    <th style="border: 1px solid #000; text-align: center; padding: 5px; font-size: 18px;">FRASE O PEDIDO</th>
+                                    <th style="border: 1px solid #000; text-align: center; padding: 5px; font-size: 18px;">FORMA PAGO</th>
+                                    <th style="border: 1px solid #000; text-align: center; padding: 5px; font-size: 18px;">TOTAL</th>
                                 </tr>
                                 <tr>
-                                    <td style="border: 1px solid #000; text-align: center; padding: 5px; font-size: 16px;">
+                                    <td style="border: 1px solid #000; text-align: center; padding: 5px; font-size: 18px;">
                                     ${frase}
                                     </td>
-                                    <td style="border: 1px solid #000; text-align: center; padding: 5px; text-transform:capitalize;">${response.data.selectedMethod}</td>
-                                    <td style="border: 1px solid #000; text-align: center; padding: 5px;">${response.data.precio}€</td>
+                                    <td style="border: 1px solid #000; text-align: center; padding: 5px; font-size: 18px; text-transform:capitalize;">${response.data.selectedMethod}</td>
+                                    <td style="border: 1px solid #000; text-align: center; padding: 5px; font-size: 18px;">${response.data.precio}€</td>
                                 </tr>
                             </table>
                         </div>`;

@@ -18,16 +18,6 @@
 
                         let decodedArray = JSON.parse(response.data.frase); // Decode JSON
                         let frase = decodedArray.join(" "); // Join array into a string
-
-                        let messageHTML = '';
-                        if (response.data.message !== "") {
-                            messageHTML = `
-                                <p style="margin: 0; font-size: 14px;">
-                                    <span style="font-weight: bold;">Mensaje: </span> ${response.data.message}
-                                </p>
-                            `;
-                        }
-
                         // Invoice content template
                         const invoiceHTML = `
                         <div style="width: 100%; max-width: 650px; border: 1px solid #000; padding: 10px; margin-bottom: 20px;">
@@ -38,7 +28,6 @@
                                 <p style="margin:0 0 5px 0; font-size: 14px;"><span style="font-weight: bold;">No.: </span> ${orderId}</p>
                                 <p style="margin:0 0 5px 0; font-size: 14px;"><span style="font-weight: bold;">Cliente: </span>${response.data.nombre}</p>
                                 <p style="margin:0 0 5px 0; font-size: 14px;"><span style="font-weight: bold;">Tipo de chocolate: </span>${response.data.chocotype}</p>
-                                ${messageHTML}
                             </div>
                             <table style="border: 1px solid #000; border-collapse: collapse; width: 100%;">
                                 <tr>

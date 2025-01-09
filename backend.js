@@ -1,80 +1,99 @@
 (function ($) {
     $(document).ready(function ($) {
 
-        $('.print-invoice-btn').on('click', function () {
-            $(".print-invoice-btn img").show();
-            const orderId = $(this).data('id');
+        $('#print-multiple-invoice-btn').on('click', function () {
+            const selectedIds = [];
+            $('.AdministracionVentas-table-tbody_id input:checked').each(function () {
+                selectedIds.push($(this).attr('id'));
+            });
 
+            if (selectedIds.length === 0) {
+                alert('Seleccione al menos un producto.');
+                return;
+            }
+            $("#print-multiple-invoice-btn img").show();
             $.ajax({
                 url: calendarSettings.ajax_url,
                 type: 'POST',
                 data: {
                     action: 'get_order_details',
-                    order_id: orderId
+                    order_ids: selectedIds, // Send multiple IDs
                 },
                 success: function (response) {
                     if (response.success) {
-                        const order = response.data;
+                        $("#print-multiple-invoice-btn img").hide();
+                        let combinedInvoices = '';
 
-                        let decodedArray = JSON.parse(response.data.frase); // Decode JSON
-                        let frase = decodedArray.join(" "); // Join array into a string
-                        // Invoice content template
-                        const invoiceHTML = `
-                        <div style="width: 100%; max-width: 650px; border: 1px solid #000; padding: 10px; margin-bottom: 20px;">
-                            <div style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 20px;">
-                                <span style="font-size: 24px; color: #000;">CHOCO<span style="color: red;">❤</span>LETRA</span>
-                            </div>
-                            <div style="margin-bottom: 20px;">
-                                <p style="margin:0 0 5px 0; font-size: 14px;"><span style="font-weight: bold;">No.: </span> ${orderId}</p>
-                                <p style="margin:0 0 5px 0; font-size: 14px;"><span style="font-weight: bold;">Cliente: </span>${response.data.nombre}</p>
-                                <p style="margin:0 0 5px 0; font-size: 14px;"><span style="font-weight: bold;">Tipo de chocolate: </span>${response.data.chocotype}</p>
-                            </div>
-                            <table style="border: 1px solid #000; border-collapse: collapse; width: 100%;">
-                                <tr>
-                                    <th style="border: 1px solid #000; text-align: center; padding: 5px; font-size: 18px;">FRASE O PEDIDO</th>
-                                    <th style="border: 1px solid #000; text-align: center; padding: 5px; font-size: 18px;">FORMA PAGO</th>
-                                    <th style="border: 1px solid #000; text-align: center; padding: 5px; font-size: 18px;">TOTAL</th>
-                                </tr>
-                                <tr>
-                                    <td style="border: 1px solid #000; text-align: center; padding: 5px; font-size: 18px;">
-                                    ${frase}
-                                    </td>
-                                    <td style="border: 1px solid #000; text-align: center; padding: 5px; font-size: 18px; text-transform:capitalize;">${response.data.selectedMethod}</td>
-                                    <td style="border: 1px solid #000; text-align: center; padding: 5px; font-size: 18px;">${response.data.precio}€</td>
-                                </tr>
-                            </table>
-                        </div>`;
+                        response.data.forEach(order => {
+                            const decodedArray = JSON.parse(order.frase);
+                            const frase = decodedArray.join(" ");
 
-                        // Combine the invoice content three times
+                            let messageHTML = '';
+                            if (order.message !== "") {
+                                messageHTML = `
+                                    <p style="margin: 0; font-size: 14px;">
+                                        <span style="font-weight: bold;">Mensaje: </span> ${order.message}
+                                    </p>
+                                `;
+                            }
+
+                            combinedInvoices += `
+                            <div style="width: 100%; max-width: 650px; border: 1px solid #000; padding: 10px; margin-bottom: 20px;">
+                                <div style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 20px;">
+                                    <span style="font-size: 24px; color: #000;">CHOCO<span style="color: red;">❤</span>LETRA</span>
+                                </div>
+                                <div style="margin-bottom: 20px;">
+                                    <p style="margin:0 0 5px 0; font-size: 14px;"><span style="font-weight: bold;">No.: </span> ${order.id}</p>
+                                    <p style="margin:0 0 5px 0; font-size: 14px;"><span style="font-weight: bold;">Cliente: </span>${order.nombre}</p>
+                                    <p style="margin:0 0 5px 0; font-size: 14px;"><span style="font-weight: bold;">Tipo de chocolate: </span>${order.chocotype}</p>
+                                    ${messageHTML}
+                                </div>
+                                <table style="border: 1px solid #000; border-collapse: collapse; width: 100%;">
+                                    <tr>
+                                        <th style="border: 1px solid #000; text-align: center; padding: 5px; font-size: 18px;">FRASE O PEDIDO</th>
+                                        <th style="border: 1px solid #000; text-align: center; padding: 5px; font-size: 18px;">FORMA PAGO</th>
+                                        <th style="border: 1px solid #000; text-align: center; padding: 5px; font-size: 18px;">TOTAL</th>
+                                    </tr>
+                                    <tr>
+                                        <td style="border: 1px solid #000; text-align: center; padding: 5px; font-size: 18px; font-size: 16px;">
+                                        ${frase}
+                                        </td>
+                                        <td style="border: 1px solid #000; text-align: center; padding: 5px; font-size: 18px; text-transform:capitalize;">${order.selectedMethod}</td>
+                                        <td style="border: 1px solid #000; text-align: center; padding: 5px; font-size: 18px;">${order.precio}€</td>
+                                    </tr>
+                                </table>
+                            </div>`;
+                        });
+
                         const fullHTML = `
                         <html>
                         <head>
                           <title>Factura</title>
                         </head>
                         <body style="font-family: Arial, sans-serif; margin: 20px;">
-                          ${invoiceHTML}
-                          ${invoiceHTML}
-                          ${invoiceHTML}
+                          ${combinedInvoices}
                           <script>
                               window.print();
                           </script>
                         </body>
                         </html>`;
 
-                        // Open print window and write content
                         const printWindow = window.open('', '_blank');
                         printWindow.document.write(fullHTML);
                         printWindow.document.close();
                     } else {
-                        alert('Failed to fetch order details: ' + response.data);
+                        alert('No se pudieron obtener los detalles del pedido: ' + response.data.message);
                     }
                 },
-                complete: function(){
-                    $(".print-invoice-btn img").hide();
+                error: function (xhr, status, error) {
+                    $("#print-multiple-invoice-btn img").hide();
+                    console.error('Error al obtener los detalles del pedido:', error);
+                    alert('Se produjo un error al obtener los detalles del pedido.');
                 }
-                
             });
         });
+
+
 
 
         $("#disable_dates").flatpickr({

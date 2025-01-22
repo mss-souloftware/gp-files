@@ -46,7 +46,6 @@
                                     <p style="margin:0 0 5px 0; font-size: 14px;"><span style="font-weight: bold;">No.: </span> ${order.id}</p>
                                     <p style="margin:0 0 5px 0; font-size: 14px;"><span style="font-weight: bold;">Cliente: </span>${order.nombre}</p>
                                     <p style="margin:0 0 5px 0; font-size: 14px;"><span style="font-weight: bold;">Tipo de chocolate: </span>${order.chocotype}</p>
-                                    ${messageHTML}
                                 </div>
                                 <table style="border: 1px solid #000; border-collapse: collapse; width: 100%;">
                                     <tr>

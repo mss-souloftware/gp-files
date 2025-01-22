@@ -40,7 +40,7 @@
                             combinedInvoices += `
                             <div style="width: 100%; max-width: 650px; border: 1px solid #000; padding: 10px; margin-bottom: 20px;">
                                 <div style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 20px;">
-                                    <span style="font-size: 24px; color: #000;">CREA TU BROWNIE</span>
+                                    <span style="font-size: 24px; color: #000;">CHOCO<span style="color: red;">❤</span>LETRA</span>
                                 </div>
                                 <div style="margin-bottom: 20px;">
                                     <p style="margin:0 0 5px 0; font-size: 14px;"><span style="font-weight: bold;">No.: </span> ${order.id}</p>
@@ -151,4 +151,4 @@
         });
 
     });
-}(jQuery))
+}(jQuery));

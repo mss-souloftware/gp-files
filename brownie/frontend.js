@@ -1037,6 +1037,12 @@
                 // Create new img element and add it to the container
                 const newImg = document.createElement("img");
                 newImg.src = currentWord[imgArrayIndex];
+
+                // Extract the letter from the filename (assuming format: /letters/Claro/{letter}.png)
+                const fileName = newImg.src.split('/').pop(); // Get last part of the URL
+                const letter = fileName.split('.')[0]; // Get filename without extension
+                newImg.alt = letter.toUpperCase(); // Set alt text
+
                 newImg.style.opacity = 1; // Show the image
                 typedImagesContainer.appendChild(newImg);
                 imageElements.push(newImg); // Keep track of added images
@@ -1058,6 +1064,7 @@
             }, 1000); // Hold the word for a second before erasing
         }
     };
+
 
     document.addEventListener("DOMContentLoaded", () => {
         typeImages();

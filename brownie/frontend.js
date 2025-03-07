@@ -328,6 +328,10 @@
             const coupon = $("#usedCoupon").val();
             const affiliateID = $("#affiliateUserID").val();
             const loggedInUser = $("#loggedInUser").val();
+            const prod_edit_id = new URLSearchParams(window.location.search).get('prod_edit');
+
+            // console.log("Editing product with ID: ", prod_edit_id);
+
 
             if (!picDate) {
                 picDate = new Date().toISOString().slice(0, 10);
@@ -345,6 +349,7 @@
 
             const dataToSend = {
                 action: 'test_action',
+                prod_edit: prod_edit_id,
                 mainText: JSON.stringify(mainText),
                 chocoType: chocoType,
                 priceTotal: priceTotal,
@@ -368,7 +373,7 @@
                 nonce: ajax_variables.nonce,
             };
 
-            // console.log(dataToSend);
+            console.log(dataToSend);
 
             $.ajax({
                 type: "POST",
@@ -440,7 +445,7 @@
                         setCookie('chocol_cookie', true);
                         setCookie('chocoletraOrderData', cookieValue);
 
-                        // console.log('Payment parameters set:', parsedResponse.Datos.merchantParameters);
+                        console.log('Payment parameters set:', parsedResponse.Datos.merchantParameters);
 
                         // Trigger payment form submission or another action if needed
                         $("#proceedPayment").click();
@@ -589,9 +594,16 @@
                         removeCookie('chocoletraOrderData');
                         removeCookie('chocol_cookie');
                         removeCookie('paypamentType');
-                        location.reload();
+                        window.location.replace(ajax_variables.pluginPageUrl);
                     },
                 });
+            });
+
+            jQuery("#editOrder").on('click', function () {
+                loader.css('height', '100%');
+                removeCookie('chocoletraOrderData');
+                removeCookie('chocol_cookie');
+                removeCookie('paypamentType');
             });
         });
 
@@ -1037,12 +1049,6 @@
                 // Create new img element and add it to the container
                 const newImg = document.createElement("img");
                 newImg.src = currentWord[imgArrayIndex];
-
-                // Extract the letter from the filename (assuming format: /letters/Claro/{letter}.png)
-                const fileName = newImg.src.split('/').pop(); // Get last part of the URL
-                const letter = fileName.split('.')[0]; // Get filename without extension
-                newImg.alt = letter.toUpperCase(); // Set alt text
-
                 newImg.style.opacity = 1; // Show the image
                 typedImagesContainer.appendChild(newImg);
                 imageElements.push(newImg); // Keep track of added images
@@ -1064,7 +1070,6 @@
             }, 1000); // Hold the word for a second before erasing
         }
     };
-
 
     document.addEventListener("DOMContentLoaded", () => {
         typeImages();

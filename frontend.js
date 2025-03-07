@@ -326,6 +326,10 @@
             const coupon = $("#usedCoupon").val();
             const affiliateID = $("#affiliateUserID").val();
             const loggedInUser = $("#loggedInUser").val();
+            const prod_edit_id = new URLSearchParams(window.location.search).get('prod_edit');
+
+            // console.log("Editing product with ID: ", prod_edit_id);
+
 
             if (!picDate) {
                 picDate = new Date().toISOString().slice(0, 10);
@@ -343,6 +347,7 @@
 
             const dataToSend = {
                 action: 'test_action',
+                prod_edit: prod_edit_id,
                 mainText: JSON.stringify(mainText),
                 chocoType: chocoType,
                 priceTotal: priceTotal,
@@ -587,9 +592,16 @@
                         removeCookie('chocoletraOrderData');
                         removeCookie('chocol_cookie');
                         removeCookie('paypamentType');
-                        location.reload();
+                        window.location.replace(ajax_variables.pluginPageUrl);
                     },
                 });
+            });
+
+            jQuery("#editOrder").on('click', function () {
+                loader.css('height', '100%');
+                removeCookie('chocoletraOrderData');
+                removeCookie('chocol_cookie');
+                removeCookie('paypamentType');
             });
         });
 

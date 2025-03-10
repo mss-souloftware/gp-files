@@ -156,16 +156,21 @@
             });
 
             if (!allFilled) {
-                alert(`❌ Por favor, completa todas las frases antes de continuar.`);
+                $(".popAlert .popAlertText").text(`❌ Por favor, completa todas las frases antes de continuar.`);
+                $(".bgblckScrn").show();
+                $(".popAlert").show();
                 return;
             }
 
             // 🔹 Check first phrase minimum spend (including shipping)
             const firstPrice = calculatePrice($('#getText').val());
             if (firstPrice < minPrice) {
-                alert(`🚀 ¡Falta poco!
+
+                $(".popAlert .popAlertText").text(`🚀 ¡Falta poco!
         📌 El pedido mínimo es de ${minPrice + shippingCost} € (incluye envío).
         💡 Añade unas letras más y hazlo inolvidable.`);
+                $(".bgblckScrn").show();
+                $(".popAlert").show();
                 return;
             }
 
@@ -174,7 +179,9 @@
             $(".fraseInput").each(function () {
                 const phrasePrice = calculatePrice($(this).val());
                 if (phrasePrice < minPrice) {
-                    alert(`❌ Cada frase debe cumplir el gasto mínimo de ${minPrice} €.`);
+                    $(".popAlert .popAlertText").text(`❌ Cada frase debe cumplir el gasto mínimo de ${minPrice} €.`);
+                    $(".bgblckScrn").show();
+                    $(".popAlert").show();
                     allAdditionalMet = false;
                     return false; // Stop checking further phrases
                 }
@@ -183,7 +190,10 @@
             if (!allAdditionalMet) return;
         });
 
-
+        $(".popAlertClose").on("click", function () {
+            $(".bgblckScrn").hide();
+            $(".popAlert").hide();
+        })
 
 
         function attachInputHandler($input, $typewriterInner) {

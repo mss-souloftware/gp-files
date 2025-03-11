@@ -110,12 +110,8 @@
 
             function getPriceForInput($input) {
                 const { price, count } = calculatePrice($input.val());
-                if (price < minPrice) {
-                    totalPrice += minPrice;
-                } else {
-                    totalPrice += minPrice + (price - minPrice);
-                }
                 totalCount += count;
+                totalPrice += price;  // Add actual character price only
             }
 
             // Calculate the price for #getText field
@@ -126,15 +122,77 @@
                 getPriceForInput(jQuery(this));
             });
 
-            // Add shipping cost to the total price
+            // Add shipping cost at the final step
             totalPrice += shippingCost;
 
+            // Update UI with calculated values
             jQuery('#ctf_form #counter').text(totalPrice.toFixed(2));
             jQuery('#actual').text(totalCount);
             jQuery('.chocoletrasPlg__wrapperCode-dataUser-form-input-price').val(totalPrice.toFixed(2));
         }
 
+        $(".notMin").on("click", function () {
+            const pricePerCharacter = Number($("#precLetras").val());
+            const pricePerSymbol = Number($("#precCoraz").val());
+            const minPrice = parseFloat(ajax_variables.gastoMinimo);
+            const shippingCost = parseFloat(ajax_variables.precEnvio);
 
+            function calculatePrice(text) {
+                let price = 0;
+                for (let i = 0; i < text.length; i++) {
+                    const char = text[i];
+                    price += (char === '✯' || char === '♥') ? pricePerSymbol : pricePerCharacter;
+                }
+                return price;
+            }
+
+            // 🔹 Check if any input is empty
+            let allFilled = true;
+            $(".fraseInput, #getText").each(function () {
+                if ($.trim($(this).val()) === "") {
+                    allFilled = false;
+                }
+            });
+
+            if (!allFilled) {
+                $(".popAlert .popAlertText").text(`❌ Por favor, completa todas las frases antes de continuar.`);
+                $(".bgblckScrn").show();
+                $(".popAlert").show();
+                return;
+            }
+
+            // 🔹 Check first phrase minimum spend (including shipping)
+            const firstPrice = calculatePrice($('#getText').val());
+            if (firstPrice < minPrice) {
+
+                $(".popAlert .popAlertText").text(`🚀 ¡Falta poco!
+        📌 El pedido mínimo es de ${minPrice + shippingCost} € (incluye envío).
+        💡 Añade unas letras más y hazlo inolvidable.`);
+                $(".bgblckScrn").show();
+                $(".popAlert").show();
+                return;
+            }
+
+            // 🔹 Check each additional phrase minimum spend
+            let allAdditionalMet = true;
+            $(".fraseInput").each(function () {
+                const phrasePrice = calculatePrice($(this).val());
+                if (phrasePrice < minPrice) {
+                    $(".popAlert .popAlertText").text(`❌ Cada frase debe cumplir el gasto mínimo de ${minPrice} €.`);
+                    $(".bgblckScrn").show();
+                    $(".popAlert").show();
+                    allAdditionalMet = false;
+                    return false; // Stop checking further phrases
+                }
+            });
+
+            if (!allAdditionalMet) return;
+        });
+
+        $(".popAlertClose").on("click", function () {
+            $(".bgblckScrn").hide();
+            $(".popAlert").hide();
+        })
 
 
         function attachInputHandler($input, $typewriterInner) {
@@ -155,12 +213,60 @@
 
         function checkInputs() {
             let allFilled = true;
+            let firstPhraseMetMinSpend = false;
+            let lastPhraseMetMinSpend = false;
 
-            if ($.trim($('#getText').val()) === "") {
-                allFilled = false;
+            const pricePerCharacter = Number($("#precLetras").val());
+            const pricePerSymbol = Number($("#precCoraz").val());
+            const minPrice = parseFloat(ajax_variables.gastoMinimo);
+            const shippingCost = parseFloat(ajax_variables.precEnvio);
+
+            function calculatePrice(text) {
+                let price = 0;
+                for (let i = 0; i < text.length; i++) {
+                    const char = text[i];
+                    price += (char === '✯' || char === '♥') ? pricePerSymbol : pricePerCharacter;
+                }
+                return price;
             }
 
-            $('.fraseInput').each(function () {
+            // 🔹 Check the FIRST phrase (includes shipping cost)
+            const firstPrice = calculatePrice($('#getText').val());
+            firstPhraseMetMinSpend = firstPrice >= minPrice;
+
+            // 🔹 Check additional phrases
+            const phrases = $(".fraseInput");
+            if (phrases.length > 0) {
+                lastPhraseMetMinSpend = false; // Reset condition
+
+                phrases.each(function () {
+                    const phrasePrice = calculatePrice($(this).val());
+                    if (phrasePrice >= minPrice) {
+                        lastPhraseMetMinSpend = true; // Last phrase met minimum spend
+                    } else {
+                        lastPhraseMetMinSpend = false; // Restrict adding another phrase
+                    }
+                });
+            } else {
+                lastPhraseMetMinSpend = firstPhraseMetMinSpend; // If no extra phrases, rely on the first phrase
+            }
+
+            // 🔹 Enable/Disable "Add New Phrase" button
+            if (firstPhraseMetMinSpend && lastPhraseMetMinSpend) {
+                $("#addNewFrase").removeAttr('disabled');
+                $("#addNewFrase").show();
+                $(".notMin").hide();
+                $("#continuarBTN").show();
+
+            } else {
+                $("#addNewFrase").prop('disabled', true);
+                $("#addNewFrase").hide();
+                $(".notMin").show();
+                $("#continuarBTN").hide();
+            }
+
+            // 🔹 Check if all fields are filled (for submit button)
+            $(".fraseInput, #getText").each(function () {
                 if ($.trim($(this).val()) === "") {
                     allFilled = false;
                 }
@@ -168,12 +274,10 @@
 
             if (allFilled) {
                 $(".dummyImg").css('display', 'none');
-                $("#addNewFrase").removeAttr('disabled');
-                $("#ctf_form .action-button").removeAttr('disabled');
+                $("#ctf_form #continuarBTN").removeAttr('disabled');
             } else {
                 $(".dummyImg").css('display', 'block');
-                $("#addNewFrase").prop('disabled', true);
-                $("#ctf_form .action-button").prop('disabled', true);
+                $("#ctf_form #continuarBTN").prop('disabled', true);
             }
         }
 

@@ -165,8 +165,8 @@
             const firstPrice = calculatePrice($('#getText').val());
             if (firstPrice < minPrice) {
 
-                $(".popAlert .popAlertText").text(`🚀 ¡Falta poco!
-        📌 El pedido mínimo es de ${minPrice + shippingCost} € (incluye envío).
+                $(".popAlert .popAlertText").text(`🚀 ¡Falta poco! <br>
+        📌 El pedido mínimo es de ${minPrice + shippingCost} € (incluye envío). <br>
         💡 Añade unas letras más y hazlo inolvidable.`);
                 $(".bgblckScrn").show();
                 $(".popAlert").show();

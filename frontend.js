@@ -775,6 +775,9 @@
 
             // Show the next fieldset
             next_fs.show();
+            if (window.innerWidth <= 768) {
+                document.getElementById('ctf_form').scrollIntoView();
+            }
             // Hide the current fieldset with style
             current_fs.animate({ opacity: 0 }, {
                 step: function (now) {
@@ -802,7 +805,9 @@
 
             // Show the previous fieldset
             previous_fs.show();
-
+            if (window.innerWidth <= 768) {
+                document.getElementById('ctf_form').scrollIntoView();
+            }
             // Hide the current fieldset with style
             current_fs.animate({ opacity: 0 }, {
                 step: function (now) {

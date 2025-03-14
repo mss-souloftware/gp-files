@@ -769,7 +769,12 @@
         $(".next").click(function () {
             current_fs = $(this).parents('fieldset');
             next_fs = $(this).parents('fieldset').next();
-
+// Check if it's the first fieldset
+            if (current === 1) {
+                console.log("Second tab")
+                $(".mobileReverse").addClass("backtop");
+            }
+            
             // Add Class Active
             $("#progressbar li").eq($("fieldset").index(next_fs)).addClass("active");
 
@@ -800,6 +805,11 @@
             current_fs = $(this).parents('fieldset');
             previous_fs = $(this).parents('fieldset').prev();
 
+            // Check if the first fieldset is active after clicking previous
+            if (current === 2) {
+                $(".mobileReverse").removeClass("backtop");
+            }
+            
             // Remove class active
             $("#progressbar li").eq($("fieldset").index(current_fs)).removeClass("active");
 

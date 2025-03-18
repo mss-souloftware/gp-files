@@ -402,6 +402,26 @@
             });
         });
 
+        let productIDs = []; 
+
+        $(".addToCart").on("click", function () {
+            let productId = $(this).attr("data-id");
+            if (!productIDs.includes(productId)) {
+                productIDs.push(productId);
+            }
+
+            $("#productID").val(productIDs.join(","));
+
+            let existingPrice = $(".chocoletrasPlg__wrapperCode-dataUser-form-input-price").val();
+            let newPrice = parseFloat(existingPrice) + parseFloat($(this).attr("data-price"));
+
+            $(".chocoletrasPlg__wrapperCode-dataUser-form-input-price").val(newPrice.toFixed(2));
+            $(".priceCounter").text(newPrice.toFixed(2));
+
+            alert(`El producto se añade a tu compra!`);
+        });
+
+
         $("#ctf_form").on("submit", function (event) {
             event.preventDefault();
             loader.css('height', '100%');
@@ -430,6 +450,7 @@
             const coupon = $("#usedCoupon").val();
             const affiliateID = $("#affiliateUserID").val();
             const loggedInUser = $("#loggedInUser").val();
+            const productID = $("#productID").val();
             const prod_edit_id = new URLSearchParams(window.location.search).get('prod_edit');
 
             // console.log("Editing product with ID: ", prod_edit_id);
@@ -472,6 +493,7 @@
                 affiliateID: affiliateID,
                 loggedInUser: loggedInUser,
                 shippingType: shippingType,
+                productID: productID,
                 nonce: ajax_variables.nonce,
             };
 
@@ -769,12 +791,13 @@
         $(".next").click(function () {
             current_fs = $(this).parents('fieldset');
             next_fs = $(this).parents('fieldset').next();
-// Check if it's the first fieldset
+
+            // Check if it's the first fieldset
             if (current === 1) {
                 console.log("Second tab")
                 $(".mobileReverse").addClass("backtop");
             }
-            
+
             // Add Class Active
             $("#progressbar li").eq($("fieldset").index(next_fs)).addClass("active");
 
@@ -783,20 +806,17 @@
             if (window.innerWidth <= 768) {
                 document.getElementById('ctf_form').scrollIntoView();
             }
+
             // Hide the current fieldset with style
             current_fs.animate({ opacity: 0 }, {
                 step: function (now) {
-                    // for making fieldset appear animation
                     var opacity = 1 - now;
-
-                    current_fs.css({
-                        'display': 'none',
-                        'position': 'relative'
-                    });
+                    current_fs.css({ 'display': 'none', 'position': 'relative' });
                     next_fs.css({ 'opacity': opacity });
                 },
                 duration: 500
             });
+
             setProgressBar(++current);
         });
 
@@ -809,7 +829,7 @@
             if (current === 2) {
                 $(".mobileReverse").removeClass("backtop");
             }
-            
+
             // Remove class active
             $("#progressbar li").eq($("fieldset").index(current_fs)).removeClass("active");
 
@@ -818,20 +838,17 @@
             if (window.innerWidth <= 768) {
                 document.getElementById('ctf_form').scrollIntoView();
             }
+
             // Hide the current fieldset with style
             current_fs.animate({ opacity: 0 }, {
                 step: function (now) {
-                    // for making fieldset appear animation
                     var opacity = 1 - now;
-
-                    current_fs.css({
-                        'display': 'none',
-                        'position': 'relative'
-                    });
+                    current_fs.css({ 'display': 'none', 'position': 'relative' });
                     previous_fs.css({ 'opacity': opacity });
                 },
                 duration: 500
             });
+
             setProgressBar(--current);
         });
 
@@ -1189,7 +1206,15 @@
         typeImages();
     });
 
-
+    $('.moreOrders').slick({
+        dots: true,
+        arrows: false,
+        infinite: false,
+        speed: 300,
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        autoplay: true,
+    });
 
 
 

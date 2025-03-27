@@ -1297,7 +1297,7 @@
         getCardInput('card-number', "border:1px solid #EFEFEF; padding:15px 2px; border-radius:5px; width:100%;", "xxxx xxxx xxxx xxxx", "");
         getExpirationInput('card-expiration', "border:1px solid #EFEFEF; padding:15px 0px 15px 5px; border-radius:5px; width:100%;", "MM/AA");
         getCVVInput('cvv', "border:1px solid #EFEFEF; padding:15px 0px 15px 5px; border-radius:5px; width:100%;", "CVV");
-        getPayButton('boton', "width: 100%; background: #003087; color: #fff; border: 0; padding: 15px; text-align: center; margin: auto; border-radius: 5px;", 'Pagar Ahora', "340873405", "2", order_id.value);
+        getPayButton('boton', "width: 100%; background: #003087; color: #fff; border: 0; padding: 15px; text-align: center; margin: auto; border-radius: 5px;", 'Pagar Ahora', "340873405", "001", order_id.value);
 
         // Initialize Redsys Form
         // getInSiteForm(

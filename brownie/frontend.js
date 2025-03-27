@@ -432,6 +432,8 @@
             const coupon = $("#usedCoupon").val();
             const affiliateID = $("#affiliateUserID").val();
             const loggedInUser = $("#loggedInUser").val();
+            const tokenIDop = $("#tokenIDop").val();
+            const order_id = $("#order_id").val();
             const prod_edit_id = new URLSearchParams(window.location.search).get('prod_edit');
 
             // console.log("Editing product with ID: ", prod_edit_id);
@@ -474,6 +476,8 @@
                 affiliateID: affiliateID,
                 loggedInUser: loggedInUser,
                 shippingType: shippingType,
+                order_id: order_id,
+                tokenIDop: tokenIDop,
                 nonce: ajax_variables.nonce,
             };
 
@@ -484,9 +488,9 @@
                 url: ajax_variables.ajax_url,
                 data: dataToSend,
                 success: function (response) {
-                    // console.log("Response from server: ", response);
+                    console.log("Response from server: ", response);
                     const parsedResponse = response;
-                    // console.log("reformed respond: ", parsedResponse)
+                    console.log("reformed respond: ", parsedResponse)
                     // Check if the response indicates success
                     if (parsedResponse.success) {
                         // Process succeeded
@@ -504,7 +508,7 @@
                             scrollTop: $("#screenCenterLoader").offset().top - 200
                         }, 0);
 
-                        // console.info("Process succeeded: ", parsedResponse);
+                        console.info("Process succeeded: ", parsedResponse);
                         const insertedId = parsedResponse.Datos.inserted_id;
                         const amount = parsedResponse.Datos.amount;
                         const paymentSelected = parsedResponse.Datos.paymentType;
@@ -552,10 +556,20 @@
                         console.log('Payment parameters set:', parsedResponse.Datos.merchantParameters);
 
                         // Trigger payment form submission or another action if needed
-                        $("#proceedPayment").click();
-
+                        if (parsedResponse.Datos.paymentType != "redsys") {
+                            $("#proceedPayment").click();
+                        } else {
+                            if (parsedResponse.Datos.redsysPay.redsysResponse) {
+                                window.location.replace(`${ajax_variables.pluginPageUrl}?payment=true`)
+                            } else {
+                                alert(parsedResponse.Datos.redsysPay.redsysMessage)
+                                window.location.replace(`${ajax_variables.pluginPageUrl}?5q4sd4ssx`)
+                            }
+                        }
                     } else {
                         console.error("Process failed: ", parsedResponse.Datos.message);
+                        alert("El pago falló!")
+                        loader.css('height', '0px');
                     }
                 },
                 complete: function () {
@@ -564,7 +578,7 @@
                     }, 5000);
                 },
                 error: function (xhr, status, error) {
-                    console.error("AJAX request failed: ", status, error);
+                    console.error("AJAX request failed: ", xhr.responseText);
                 }
             });
 
@@ -590,14 +604,24 @@
 
                 if (selectedGatway === 'paypal') {
                     paymentMethod = "payPal";
+                    $(".insiteForm").hide();
+                    $(".swithcerBtnGroup").show();
                 } else if (selectedGatway === 'redsys') {
                     paymentMethod = "redsys";
+                    $(".insiteForm").show();
+                    $(".swithcerBtnGroup").hide();
                 } else if (selectedGatway === 'bizum') {
                     paymentMethod = "bizum";
+                    $(".insiteForm").hide();
+                    $(".swithcerBtnGroup").show();
                 } else if (selectedGatway === 'google') {
                     paymentMethod = "google";
+                    $(".insiteForm").hide();
+                    $(".swithcerBtnGroup").show();
                 } else if (selectedGatway === 'apple') {
                     paymentMethod = "apple";
+                    $(".insiteForm").hide();
+                    $(".swithcerBtnGroup").show();
                 }
 
                 $("#selectedPayment").val(paymentMethod);
@@ -1182,6 +1206,78 @@
 
 
 
+    function getCookie(name) {
+        var value = "; " + document.cookie;
+        var parts = value.split("; " + name + "=");
+        if (parts.length === 2) return parts.pop().split(";").shift();
+    }
 
+    let chocol_cookie_get = getCookie("chocol_cookie");
+    if (!chocol_cookie_get) {
+        console.log("ScriptDisbale")
+        document.addEventListener("DOMContentLoaded", function () {
+            let paymentForm = document.getElementById("redsys-payment-form");
+            let submitButton = paymentForm.querySelector("button[type='submit']");
+            let tokenInp = document.querySelector("#tokenIDop");
+            let order_id = document.querySelector("#order_id");
+            let isProcessing = false;
+
+            function waitForToken() {
+                if (isProcessing) return;
+
+                let tokenField = document.getElementById("token");
+                let token = tokenField.value;
+
+                if (token) {
+                    console.log("✅ Token received: ", token);
+                    isProcessing = true;
+                    tokenInp.value = token;
+                    $("#ctf_form").submit();
+                } else {
+                    // console.log("⏳ Waiting for token...");
+                    setTimeout(waitForToken, 500);
+                }
+            }
+
+            window.addEventListener("message", function (event) {
+                storeIdOper(event, "token", "errorCode", merchantValidation);
+                // console.log("📢 Redsys is processing...");
+                waitForToken();
+            });
+
+            paymentForm.addEventListener("submit", function (event) {
+                event.preventDefault();
+                if (isProcessing) return;
+                submitButton.disabled = true;
+                // console.log("🔄 Requesting token from Redsys...");
+                storeIdOper(window, "token", "errorCode", merchantValidation);
+                waitForToken();
+            });
+        });
+
+        function merchantValidation() {
+            return true;
+        }
+
+        getCardInput('card-number', "border:1px solid #EFEFEF; padding:15px 2px; border-radius:5px; width:100%;", "xxxx xxxx xxxx xxxx", "");
+        getExpirationInput('card-expiration', "border:1px solid #EFEFEF; padding:15px 0px 15px 5px; border-radius:5px; width:100%;", "MM/AA");
+        getCVVInput('cvv', "border:1px solid #EFEFEF; padding:15px 0px 15px 5px; border-radius:5px; width:100%;", "CVV");
+        getPayButton('boton', "width: 100%; background: #003087; color: #fff; border: 0; padding: 15px; text-align: center; margin: auto; border-radius: 5px;", 'Pagar Ahora', "340873405", "2", order_id.value);
+
+        // Initialize Redsys Form
+        // getInSiteForm(
+        //     'card-form',
+        //     '',
+        //     '',
+        //     '',
+        //     '',
+        //     'Pagar Ahora',
+        //     '340873405', // Merchant code
+        //     '2',         // Terminal
+        //     order_id.value, // Unique Order ID
+        //     'ES',        // Language
+        //     true
+        // );
+    }
 
 }(jQuery));

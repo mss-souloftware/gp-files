@@ -1,6 +1,10 @@
 (function ($) {
 
     let loader = $(".chocoletrasPlg-spiner");
+    $(document.body).on("click", "#phrase-list li", function () {
+        let phraseSelected = $(this).text();
+        $("#getText").val(phraseSelected).trigger('input');
+    });
     $(document).ready(function () {
         const keyMap = {
             '0': '0.webp', '1': '1.webp', '2': '2.webp', '3': '3.webp', '4': '4.webp', '5': '5.webp',

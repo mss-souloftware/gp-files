@@ -18,15 +18,20 @@
 
         function generateImages(text, $typewriterInner, spaceSymbol) {
             let chocoType = $("#chocoBase").val();
+            const audioElement = document.getElementById('keySound');
             console.log('Current chocoType:', chocoType); // Debugging line
+            audioElement.currentTime = 0;
+            audioElement.play();
             $typewriterInner.empty();
             const words = text.split(spaceSymbol);
-            words.forEach((word, index) => {
+            words.forEach((word, wordIndex) => {
                 let $wordDiv = $('<div>').addClass('word');
                 let imgCount = 0;
 
-                for (const char of word) {
+                for (let i = 0; i < word.length; i++) {
+                    const char = word[i];
                     let imgFileName;
+
                     if (char === spaceSymbol) {
                         imgFileName = keyMap[' '][$('#letras').val()];
                     } else {
@@ -37,7 +42,17 @@
                         const imgPath = `${ajax_variables.pluginUrl}img/letters/${chocoType}/${imgFileName}`;
                         const $img = $('<img>').attr('src', imgPath).addClass('letter-img');
 
-                        // Check if imgCount exceeds 15
+                        // Add "pop" class only to the last character image
+                        const isLastWord = wordIndex === words.length - 1;
+                        const isLastChar = i === word.length - 1;
+                        if (isLastWord && isLastChar) {
+                            $img.addClass('pop');
+
+                            setTimeout(() => {
+                                $img.removeClass('pop');
+                            }, 500);
+                        }
+
                         if (imgCount >= 15) {
                             $typewriterInner.append($wordDiv);
                             $wordDiv = $('<div>').addClass('word');
@@ -51,12 +66,13 @@
 
                 $typewriterInner.append($wordDiv);
 
-                if (index < words.length - 1) {
+                if (wordIndex < words.length - 1) {
                     const imgPath = `${ajax_variables.pluginUrl}img/letters/${chocoType}/${keyMap[' '][$('#letras').val()]}`;
                     const $img = $('<img>').attr('src', imgPath).addClass('letter-img');
                     $typewriterInner.append($img);
                 }
             });
+            
 
             let maxChildCount = 0;
             $('.typewriterInner .word').each(function () {

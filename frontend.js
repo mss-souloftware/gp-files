@@ -447,6 +447,8 @@
             loader.css('height', '100%');
             console.log('submission');
 
+            let originValue = getCookie("pysTrafficSource");
+
             $('html, body').animate({
                 scrollTop: $("#screenCenterLoader").offset().top - 200
             }, 0);
@@ -474,6 +476,7 @@
             const order_id = $("#order_id").val();
             const productID = $("#productID").val();
             const prod_edit_id = new URLSearchParams(window.location.search).get('prod_edit');
+            const origin = originValue;
 
             // console.log("Editing product with ID: ", prod_edit_id);
 
@@ -519,6 +522,7 @@
                 tokenIDop: tokenIDop,
                 productID: productID,
                 nonce: ajax_variables.nonce,
+                origin: origin,
             };
 
             // console.log(dataToSend);

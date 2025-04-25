@@ -3,7 +3,10 @@
     let loader = $(".chocoletrasPlg-spiner");
     $(document.body).on("click", "#phrase-list li", function () {
         let phraseSelected = $(this).text();
+        let list = $('#phrase-list');
         $("#getText").val(phraseSelected).trigger('input');
+        list.empty();
+        $('#category option:first').prop('selected', true).trigger('change');
     });
     $(document).ready(function () {
         const keyMap = {

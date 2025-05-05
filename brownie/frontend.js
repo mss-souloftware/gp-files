@@ -1,5 +1,13 @@
 (function ($) {
+
     let loader = $(".chocoletrasPlg-spiner");
+    $(document.body).on("click", "#phrase-list li", function () {
+        let phraseSelected = $(this).text();
+        let list = $('#phrase-list');
+        $("#getText").val(phraseSelected).trigger('input');
+        list.empty();
+        $('#category option:first').prop('selected', true).trigger('change');
+    });
     $(document).ready(function () {
         const keyMap = {
             '0': '0.png', '1': '1.png', '2': '2.png', '3': '3.png', '4': '4.png', '5': '5.png',
@@ -17,15 +25,20 @@
 
         function generateImages(text, $typewriterInner, spaceSymbol) {
             let chocoType = $("#chocoBase").val();
+            const audioElement = document.getElementById('keySound');
             console.log('Current chocoType:', chocoType); // Debugging line
+            audioElement.currentTime = 0;
+            audioElement.play();
             $typewriterInner.empty();
             const words = text.split(spaceSymbol);
-            words.forEach((word, index) => {
+            words.forEach((word, wordIndex) => {
                 let $wordDiv = $('<div>').addClass('word');
                 let imgCount = 0;
 
-                for (const char of word) {
+                for (let i = 0; i < word.length; i++) {
+                    const char = word[i];
                     let imgFileName;
+
                     if (char === spaceSymbol) {
                         imgFileName = keyMap[' '][$('#letras').val()];
                     } else {
@@ -36,7 +49,17 @@
                         const imgPath = `${ajax_variables.pluginUrl}img/letters/${chocoType}/${imgFileName}`;
                         const $img = $('<img>').attr('src', imgPath).addClass('letter-img');
 
-                        // Check if imgCount exceeds 15
+                        // Add "pop" class only to the last character image
+                        const isLastWord = wordIndex === words.length - 1;
+                        const isLastChar = i === word.length - 1;
+                        if (isLastWord && isLastChar) {
+                            $img.addClass('pop');
+
+                            setTimeout(() => {
+                                $img.removeClass('pop');
+                            }, 500);
+                        }
+
                         if (imgCount >= 15) {
                             $typewriterInner.append($wordDiv);
                             $wordDiv = $('<div>').addClass('word');
@@ -50,12 +73,13 @@
 
                 $typewriterInner.append($wordDiv);
 
-                if (index < words.length - 1) {
+                if (wordIndex < words.length - 1) {
                     const imgPath = `${ajax_variables.pluginUrl}img/letters/${chocoType}/${keyMap[' '][$('#letras').val()]}`;
                     const $img = $('<img>').attr('src', imgPath).addClass('letter-img');
                     $typewriterInner.append($img);
                 }
             });
+            
 
             let maxChildCount = 0;
             $('.typewriterInner .word').each(function () {
@@ -401,13 +425,32 @@
             });
         });
 
+        let productIDs = [];
 
+        $(".addToCart").on("click", function () {
+            let productId = $(this).attr("data-id");
+            if (!productIDs.includes(productId)) {
+                productIDs.push(productId);
+            }
+
+            $("#productID").val(productIDs.join(","));
+
+            let existingPrice = $(".chocoletrasPlg__wrapperCode-dataUser-form-input-price").val();
+            let newPrice = parseFloat(existingPrice) + parseFloat($(this).attr("data-price"));
+
+            $(".chocoletrasPlg__wrapperCode-dataUser-form-input-price").val(newPrice.toFixed(2));
+            $(".priceCounter").text(newPrice.toFixed(2));
+
+            alert(`El producto se añade a tu compra!`);
+        });
 
 
         $("#ctf_form").on("submit", function (event) {
             event.preventDefault();
             loader.css('height', '100%');
             console.log('submission');
+
+            let originValue = getCookie("pysTrafficSource");
 
             $('html, body').animate({
                 scrollTop: $("#screenCenterLoader").offset().top - 200
@@ -434,7 +477,9 @@
             const loggedInUser = $("#loggedInUser").val();
             const tokenIDop = $("#tokenIDop").val();
             const order_id = $("#order_id").val();
+            const productID = $("#productID").val();
             const prod_edit_id = new URLSearchParams(window.location.search).get('prod_edit');
+            const origin = originValue;
 
             // console.log("Editing product with ID: ", prod_edit_id);
 
@@ -478,19 +523,21 @@
                 shippingType: shippingType,
                 order_id: order_id,
                 tokenIDop: tokenIDop,
+                productID: productID,
                 nonce: ajax_variables.nonce,
+                origin: origin,
             };
 
-            console.log(dataToSend);
+            // console.log(dataToSend);
 
             $.ajax({
                 type: "POST",
                 url: ajax_variables.ajax_url,
                 data: dataToSend,
                 success: function (response) {
-                    console.log("Response from server: ", response);
+                    // console.log("Response from server: ", response);
                     const parsedResponse = response;
-                    console.log("reformed respond: ", parsedResponse)
+                    // console.log("reformed respond: ", parsedResponse)
                     // Check if the response indicates success
                     if (parsedResponse.success) {
                         // Process succeeded
@@ -508,7 +555,7 @@
                             scrollTop: $("#screenCenterLoader").offset().top - 200
                         }, 0);
 
-                        console.info("Process succeeded: ", parsedResponse);
+                        // console.info("Process succeeded: ", parsedResponse);
                         const insertedId = parsedResponse.Datos.inserted_id;
                         const amount = parsedResponse.Datos.amount;
                         const paymentSelected = parsedResponse.Datos.paymentType;
@@ -553,7 +600,7 @@
                         setCookie('chocol_cookie', true);
                         setCookie('chocoletraOrderData', cookieValue);
 
-                        console.log('Payment parameters set:', parsedResponse.Datos.merchantParameters);
+                        // console.log('Payment parameters set:', parsedResponse.Datos.merchantParameters);
 
                         // Trigger payment form submission or another action if needed
                         if (parsedResponse.Datos.paymentType != "redsys") {
@@ -796,25 +843,31 @@
             current_fs = $(this).parents('fieldset');
             next_fs = $(this).parents('fieldset').next();
 
+            // Check if it's the first fieldset
+            if (current === 1) {
+                console.log("Second tab")
+                $(".mobileReverse").addClass("backtop");
+            }
+
             // Add Class Active
             $("#progressbar li").eq($("fieldset").index(next_fs)).addClass("active");
 
             // Show the next fieldset
             next_fs.show();
+            if (window.innerWidth <= 768) {
+                document.getElementById('ctf_form').scrollIntoView();
+            }
+
             // Hide the current fieldset with style
             current_fs.animate({ opacity: 0 }, {
                 step: function (now) {
-                    // for making fieldset appear animation
                     var opacity = 1 - now;
-
-                    current_fs.css({
-                        'display': 'none',
-                        'position': 'relative'
-                    });
+                    current_fs.css({ 'display': 'none', 'position': 'relative' });
                     next_fs.css({ 'opacity': opacity });
                 },
                 duration: 500
             });
+
             setProgressBar(++current);
         });
 
@@ -823,26 +876,30 @@
             current_fs = $(this).parents('fieldset');
             previous_fs = $(this).parents('fieldset').prev();
 
+            // Check if the first fieldset is active after clicking previous
+            if (current === 2) {
+                $(".mobileReverse").removeClass("backtop");
+            }
+
             // Remove class active
             $("#progressbar li").eq($("fieldset").index(current_fs)).removeClass("active");
 
             // Show the previous fieldset
             previous_fs.show();
+            if (window.innerWidth <= 768) {
+                document.getElementById('ctf_form').scrollIntoView();
+            }
 
             // Hide the current fieldset with style
             current_fs.animate({ opacity: 0 }, {
                 step: function (now) {
-                    // for making fieldset appear animation
                     var opacity = 1 - now;
-
-                    current_fs.css({
-                        'display': 'none',
-                        'position': 'relative'
-                    });
+                    current_fs.css({ 'display': 'none', 'position': 'relative' });
                     previous_fs.css({ 'opacity': opacity });
                 },
                 duration: 500
             });
+
             setProgressBar(--current);
         });
 
@@ -1203,7 +1260,15 @@
         typeImages();
     });
 
-
+    $('.moreOrders').slick({
+        dots: true,
+        arrows: false,
+        infinite: false,
+        speed: 300,
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        autoplay: true,
+    });
 
 
     function getCookie(name) {

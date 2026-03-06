@@ -602,6 +602,17 @@
 
                         // console.log('Payment parameters set:', parsedResponse.Datos.merchantParameters);
 
+                        if (parsedResponse.Datos.paymentType === "stripe") {
+                            if (parsedResponse.Datos.stripeSessionUrl) {
+                                window.location.replace(parsedResponse.Datos.stripeSessionUrl);
+                                return;
+                            } else {
+                                alert("Failed to initiate Stripe Checkout.");
+                                loader.css('height', '0px');
+                                return;
+                            }
+                        }
+
                         // Trigger payment form submission or another action if needed
                         if (parsedResponse.Datos.paymentType != "redsys") {
                             $("#proceedPayment").click();
@@ -614,7 +625,7 @@
                             }
                         }
                     } else {
-                        console.error("Process failed: ", parsedResponse.Datos.message);
+                        console.error("Process failed: ", parsedResponse);
                         alert("El pago falló!")
                         loader.css('height', '0px');
                     }
@@ -667,6 +678,10 @@
                     $(".swithcerBtnGroup").show();
                 } else if (selectedGatway === 'apple') {
                     paymentMethod = "apple";
+                    $(".insiteForm").hide();
+                    $(".swithcerBtnGroup").show();
+                } else if (selectedGatway === 'stripe') {
+                    paymentMethod = "stripe";
                     $(".insiteForm").hide();
                     $(".swithcerBtnGroup").show();
                 }

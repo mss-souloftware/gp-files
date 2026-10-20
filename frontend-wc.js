@@ -9,8 +9,6 @@
     | Complete frontend JavaScript
     |
     | Includes:
-    | - Plugin initialization state
-    | - Preloader protection
     | - Letter image preloading
     | - Phrase generation
     | - Price calculation
@@ -24,8 +22,7 @@
        GLOBAL STATE
        ======================================================================== */
 
-    let pageReady = false;
-    let pluginInitializing = true;
+    let pageReady = true;
 
 
     /* ========================================================================
@@ -152,29 +149,6 @@
 
 
     /* ========================================================================
-       WAIT FOR BROWSER RENDERING
-       ======================================================================== */
-
-    function waitForBrowserRender() {
-
-        return new Promise(function (resolve) {
-
-            requestAnimationFrame(function () {
-
-                requestAnimationFrame(function () {
-
-                    resolve();
-
-                });
-
-            });
-
-        });
-
-    }
-
-
-    /* ========================================================================
        INITIALIZE PLUGIN
        ======================================================================== */
 
@@ -186,15 +160,12 @@
         if (
             typeof ctfw_vars === 'undefined' ||
             !ctfw_vars.pluginUrl ||
-            !ctfw_vars.ajax_url ||
-            !ctfw_vars.nonce
+            !ctfw_vars.ajax_url
         ) {
 
             console.error(
                 'Crea Tu Frase: Required configuration is missing.'
             );
-
-            showInitializationError();
 
             return;
 
@@ -202,120 +173,20 @@
 
 
         /*
-         * Preload all letter images.
+         * Preload letter images in the background for smooth typing without blocking.
          */
         preloadPluginImages()
-
             .then(function () {
-
-                /*
-                 * Give the browser a moment to finish rendering
-                 * the loaded assets.
-                 */
-                return waitForBrowserRender();
-
-            })
-
-            .then(function () {
-
-                /*
-                 * Plugin is now ready.
-                 */
-                pageReady = true;
-                pluginInitializing = false;
-
-
-                const $wrapper = $('#mainWrapperForm');
-                const $preloader = $('#ctfw_preloader');
-
-
-                /*
-                 * Remove loading state.
-                 */
-                $wrapper.removeClass('ctfw-loading');
-
-
-                /*
-                 * Enable phrase input.
-                 */
-                $('#getText').prop('disabled', false);
-
-
-                /*
-                 * Enable space selector.
-                 */
-                $('#letras').prop('disabled', false);
-
-
-                /*
-                 * Enable chocolate selector.
-                 */
-                $('#chocoBase').prop('disabled', false);
-
-
-                /*
-                 * Enable Add to Cart.
-                 */
-                $('#ctfw_add_to_cart_btn')
-                    .prop('disabled', false);
-
-
-                /*
-                 * Hide preloader.
-                 */
-                $preloader.addClass('ctfw-loaded');
-
-
                 console.log(
-                    'Crea Tu Frase: Plugin successfully initialized.'
+                    'Crea Tu Frase: Letter images preloaded.'
                 );
-
             })
-
             .catch(function (error) {
-
-                console.error(
-                    'Crea Tu Frase initialization error:',
+                console.warn(
+                    'Crea Tu Frase: Background preloading warning:',
                     error
                 );
-
-                showInitializationError();
-
             });
-
-    }
-
-
-    /* ========================================================================
-       INITIALIZATION ERROR
-       ======================================================================== */
-
-    function showInitializationError() {
-
-        pageReady = false;
-        pluginInitializing = true;
-
-
-        const $preloader = $('#ctfw_preloader');
-
-
-        $preloader.find('.ctfw-loader-title').text(
-            'No se pudo cargar el configurador'
-        );
-
-
-        $preloader.find('.ctfw-loader-text').text(
-            'Actualiza la página e inténtalo de nuevo.'
-        );
-
-
-        /*
-         * Keep everything disabled.
-         */
-        $('#getText').prop('disabled', true);
-        $('#letras').prop('disabled', true);
-        $('#chocoBase').prop('disabled', true);
-        $('#ctfw_add_to_cart_btn').prop('disabled', true);
 
     }
 
@@ -332,43 +203,8 @@
            ==================================================================== */
 
         const $wrapper = $('#mainWrapperForm');
-        const $preloader = $('#ctfw_preloader');
         const $input = $('#getText');
         const $button = $('#ctfw_add_to_cart_btn');
-
-
-        /* ====================================================================
-           LOCK EVERYTHING IMMEDIATELY
-           ==================================================================== */
-
-        /*
-         * Add loading class to wrapper.
-         */
-        $wrapper.addClass('ctfw-loading');
-
-
-        /*
-         * Disable phrase input.
-         */
-        $input.prop('disabled', true);
-
-
-        /*
-         * Disable space selector.
-         */
-        $('#letras').prop('disabled', true);
-
-
-        /*
-         * Disable chocolate selector.
-         */
-        $('#chocoBase').prop('disabled', true);
-
-
-        /*
-         * Disable Add to Cart.
-         */
-        $button.prop('disabled', true);
 
 
         /* ====================================================================
@@ -547,7 +383,7 @@
 
                         imgFileName =
                             keyMap[' '][
-                                $('#letras').val()
+                            $('#letras').val()
                             ];
 
                     }
@@ -559,7 +395,7 @@
 
                         imgFileName =
                             keyMap[
-                                char.toUpperCase()
+                            char.toUpperCase()
                             ] ||
                             keyMap[char];
 
@@ -666,7 +502,7 @@
                         chocoType +
                         '/' +
                         keyMap[' '][
-                            $('#letras').val()
+                        $('#letras').val()
                         ];
 
 
@@ -898,22 +734,6 @@
         function updateText() {
 
             /*
-             * Safety check.
-             *
-             * This should normally never happen because
-             * the input is disabled while loading.
-             */
-            if (
-                !pageReady ||
-                pluginInitializing
-            ) {
-
-                return;
-
-            }
-
-
-            /*
              * Hide dummy typewriter image.
              */
             $('.dummyImg').hide();
@@ -1046,35 +866,6 @@
 
                     const $this =
                         $(this);
-
-
-                    /* ========================================================
-                       SAFETY CHECK #1
-                       ======================================================== */
-
-                    if (
-                        !pageReady ||
-                        pluginInitializing
-                    ) {
-
-                        $(
-                            '.popAlert .popAlertText'
-                        ).text(
-                            '⏳ El configurador todavía se está preparando. Por favor espera un momento.'
-                        );
-
-
-                        $('.bgblckScrn')
-                            .show();
-
-
-                        $('.popAlert')
-                            .show();
-
-
-                        return;
-
-                    }
 
 
                     /* ========================================================
@@ -1238,7 +1029,7 @@
 
                                     const errorMessage =
                                         res &&
-                                        res.data
+                                            res.data
                                             ? res.data
                                             : 'No se pudo añadir el producto al carrito.';
 

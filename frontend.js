@@ -1294,7 +1294,7 @@
         console.log("ScriptDisbale")
         document.addEventListener("DOMContentLoaded", function () {
             let paymentForm = document.getElementById("redsys-payment-form");
-            let submitButton = paymentForm.querySelector("button[type='submit']");
+            // let submitButton = paymentForm.querySelector("button[type='submit']");
             let tokenInp = document.querySelector("#tokenIDop");
             let order_id = document.querySelector("#order_id");
             let isProcessing = false;
